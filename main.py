@@ -1,11 +1,11 @@
 import streamlit as st
 import pandas as pd
 from transformers import AutoTokenizer, TapasForQuestionAnswering
-import torch
 import warnings
+import app
 
 # Suppress FutureWarnings
-warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore")
 
 @st.cache_resource
 def load_model():
@@ -15,7 +15,6 @@ def load_model():
     return tokenizer, model
 
 def query_model(question, df, tokenizer, model):
-    # Convert all data to strings
     table = df.astype(str)
     
     inputs = tokenizer(table=table, queries=[question], padding='max_length', return_tensors="pt")
@@ -31,11 +30,9 @@ def query_model(question, df, tokenizer, model):
         loss
     )
     
-    # Check if we got any answers
     if answers and answers[0]:
         coordinates = answers[0][0]
         if isinstance(coordinates, list) and len(coordinates) > 0:
-            # Handle multiple cell answers
             answer_data = []
             for coord in coordinates:
                 if isinstance(coord, tuple) and len(coord) == 2:
@@ -45,7 +42,6 @@ def query_model(question, df, tokenizer, model):
             if answer_data:
                 return f"Answer: {', '.join(answer_data)}"
         elif isinstance(coordinates, tuple) and len(coordinates) == 2:
-            # Handle single cell answer
             row, col = coordinates
             if 0 <= row < len(df) and 0 <= col < len(df.columns):
                 return f"Answer: {df.iloc[row, col]}"
@@ -53,8 +49,7 @@ def query_model(question, df, tokenizer, model):
     else:
         return "Sorry, I couldn't find an answer to that question."
 
-def main():
-    st.set_page_config(page_title="Ask your Excel")
+def render_excel_qa():
     st.header("Ask your Excel 📈")
 
     tokenizer, model = load_model()
@@ -69,6 +64,17 @@ def main():
             with st.spinner("Processing..."):
                 result = query_model(user_question, df, tokenizer, model)
                 st.write(result)
+
+def main():
+    st.set_page_config(page_title="Excel & Academic Support Chatbot")
+    
+    st.sidebar.title("Contents")
+    page = st.sidebar.selectbox("Go to", ["Excel QA", "Academic Support Chatbot"])
+
+    if page == "Excel QA":
+        render_excel_qa()
+    elif page == "Academic Support Chatbot":
+        app.main()
 
 if __name__ == "__main__":
     main()
