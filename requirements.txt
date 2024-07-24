@@ -1,6 +1,10 @@
 streamlit
+treamlit_option_menu
 pandas
 transformers
 torch
-huggingface-hub
+matplotlib.pyplot
+seaborn
 langchain
+langchain_community
+huggingface_hub
