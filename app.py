@@ -4,7 +4,7 @@ from langchain.prompts import PromptTemplate
 
 client = InferenceClient(
     "microsoft/Phi-3-mini-4k-instruct",
-    token="--include HGF token here--"
+    token="--include your hf token key here--"
 )
 
 SYSTEM_PROMPT_ACADEMIC = """You are an academic support chatbot. 
